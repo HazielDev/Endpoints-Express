@@ -1,22 +1,7 @@
 const express = require('express')
-const faker = require('faker')
 const router = express.Router();
-
-const prodsList = [];
-
-for (let c = 0; c < 10; c++) {
-    prodsList.push({
-        Id: prodsList.length + 1,
-        image: faker.image.imageUrl(),
-        productName: faker.commerce.productName(),
-        Price: parseInt(faker.commerce.price(), 10),
-        description: faker.lorem.sentence(),
-        active: true,
-        Stock: 12,
-        categoryId: c+1,
-        brandId: c+1
-    });
-}
+const prodsList = require('../data/prods');
+const catsList = require('../data/cats');
 
 router.get('/', (req, res) => {
     res.json(prodsList);
@@ -29,7 +14,29 @@ router.get('/precio/:price', (req, res) => {
 
 router.get('/:id', (req, res) => {
     const {id} = req.params;
-    res.json(prodsList.filter(p => p.Id == id))
+    const findProd = prodsList.find(p => p.Id == id);
+    
+    if(findProd){
+        const cat = catsList.find(i => i.id == findProd.id )
+        console.log(cat);
+        
+        findProd.brandName = cat.categoryName;
+        res.status(200).json(prodsList.find(p => p.Id == id))
+    }else{
+        res.status(404).json({ message: "producto, no encontrado" })
+    }
+});
+
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    const index = prodsList.findIndex(s => s.Id == id);
+
+    if (index === -1) {
+        return res.status(404).json({ message: `Supplier with id ${id} not found` });
+    }
+
+    const deleted = prodsList.splice(index, 1);
+    res.json({ message: `Producto con ID: ${id} se borro de manera exitosa`, supplier: deleted[0] });
 });
 
 module.exports = router;
