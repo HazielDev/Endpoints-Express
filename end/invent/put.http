@@ -1,0 +1,10 @@
+PUT http://localhost:3000/inventory/1
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 150,
+  "movementType": "IN",
+  "date": "12/03/26",
+  "description": "Ingreso de producto"
+}

@@ -1,0 +1,7 @@
+POST http://localhost:3000/brands
+Content-Type: application/json
+
+{
+  "brandName": "Super brand",
+  "description": "una descripcion"
+}

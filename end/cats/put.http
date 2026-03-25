@@ -1,0 +1,7 @@
+PUT http://localhost:3000/categories/1
+Content-Type: application/json
+
+{
+  "categoryName": "Super category 2",
+  "description": "una descripcion"
+}

@@ -1,0 +1,7 @@
+POST http://localhost:3000/categories
+Content-Type: application/json
+
+{
+  "categoryName": "Super category",
+  "description": "una descripcion"
+}

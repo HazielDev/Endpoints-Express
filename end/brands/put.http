@@ -1,0 +1,7 @@
+PUT http://localhost:3000/brands/1
+Content-Type: application/json
+
+{
+  "brandName": "Super brand",
+  "description": "una descripcion"
+}

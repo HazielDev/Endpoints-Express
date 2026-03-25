@@ -1,0 +1,10 @@
+POST http://localhost:3000/inventory
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "quantity": 100,
+    "movementType": "IN",
+    "date": "12/03/26",
+    "description": "Ingreso de producto"
+}
