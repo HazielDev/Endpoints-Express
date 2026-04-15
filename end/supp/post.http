@@ -1,0 +1,11 @@
+POST http://localhost:3000/suppliers
+Content-Type: application/json
+
+{
+    "supplierName": "Schamberger, Bednar and Larson",
+    "contactName": "Kellie Becker",
+    "phone": "902-934-6694 x51748",
+    "email": "Helene.Graham46@hotmail.com",
+    "active": false,
+    "address": "734 Ezequiel Land, West Jeremie"
+}

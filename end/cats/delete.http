@@ -1,2 +1,2 @@
-DELETE http://localhost:3000/categories/1
+DELETE http://localhost:3000/categories/10
 Content-Type: application/json

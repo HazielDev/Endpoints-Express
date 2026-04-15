@@ -1,27 +1,17 @@
-const express = require("express")
-const faker = require("faker")
+const express = require("express");
 const router = express.Router();
-
-const brandsList = [];
-
-for (let i = 1; i <= 10; i++) {
-    brandsList.push({
-        Id: i,
-        brandName: faker.company.companyName(),
-        description: faker.company.catchPhrase(),
-    });
-}
+const { brandService, productsService } = require('../services');
 
 router.get('/', (req, res) => {
-    res.json(brandsList);
+    res.json(brandService.getAll());
 });
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
-    const brand = brandsList.find(b => b.Id == id);
+    const brand = brandService.getById(id);
 
     if (!brand) {
-        return res.status(404).json({ message: `Brand with id ${id} not found` });
+        return res.status(404).json({ message: `Marca con id ${id} no encontrada` });
     }
 
     res.json(brand);
@@ -31,51 +21,45 @@ router.post('/', (req, res) => {
     const { brandName, description } = req.body;
 
     if (!brandName || !description) {
-        return res.status(400).json({ message: 'brandName and description are required' });
+        return res.status(400).json({ message: 'brandName y description son obligatorios' });
     }
 
-    const newBrand = {
-        Id: brandsList.length > 0 ? Math.max(...brandsList.map(b => b.Id)) + 1 : 1,
-        brandName,
-        description,
-    };
-
-    brandsList.push(newBrand);
+    const newBrand = brandService.create({ brandName, description });
     res.status(201).json(newBrand);
 });
 
 router.put('/:id', (req, res) => {
     const { id } = req.params;
     const { brandName, description } = req.body;
-    const index = brandsList.findIndex(b => b.Id == id);
-
-    if (index === -1) {
-        return res.status(404).json({ message: `Brand with id ${id} not found` });
-    }
 
     if (!brandName || !description) {
-        return res.status(400).json({ message: 'brandName and description are required' });
+        return res.status(400).json({ message: 'brandName y description son obligatorios' });
     }
 
-    brandsList[index] = {
-        Id: Number(id),
-        brandName,
-        description,
-    };
+    const updatedBrand = brandService.update(id, { brandName, description });
 
-    res.json(brandsList[index]);
+    if (!updatedBrand) {
+        return res.status(404).json({ message: `Marca con id ${id} no encontrada` });
+    }
+
+    res.json(updatedBrand);
 });
 
 router.delete('/:id', (req, res) => {
     const { id } = req.params;
-    const index = brandsList.findIndex(b => b.Id == id);
 
-    if (index === -1) {
-        return res.status(404).json({ message: `Brand with id ${id} not found` });
+    // Verificar si hay productos asociados a esta marca
+    if (productsService.hasBrandProducts(id)) {
+        return res.status(400).json({ message: `No se puede borrar la marca con id: ${id} porque tiene productos asociados` });
     }
 
-    const deleted = brandsList.splice(index, 1);
-    res.json({ message: `Brand con id ${id} borrada con exito.`, brand: deleted[0] });
+    const deletedBrand = brandService.delete(id);
+
+    if (!deletedBrand) {
+        return res.status(404).json({ message: `Marca con id ${id} no encontrada` });
+    }
+
+    res.json({ message: `Marca con id ${id} borrada con éxito.`, brand: deletedBrand });
 });
 
 module.exports = router;

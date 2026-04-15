@@ -1,2 +1,2 @@
-DELETE http://localhost:3000/products/1
+DELETE http://localhost:3000/products/10
 Content-Type: application/json

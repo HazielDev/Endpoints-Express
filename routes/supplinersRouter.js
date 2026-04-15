@@ -1,31 +1,17 @@
-const express = require('express')
-const faker = require('faker')
+const express = require('express');
 const router = express.Router();
-
-const supplinersList = [];
-
-for (let i = 1; i <= 10; i++) {
-    supplinersList.push({
-        Id: i,
-        supplierName: faker.company.companyName(),
-        contactName: faker.name.findName(),
-        phone: faker.phone.phoneNumber(),
-        email: faker.internet.email(),
-        active: faker.datatype.boolean(),
-        address: faker.address.streetAddress() + ", " + faker.address.city()
-    });
-}
+const { suppliersService } = require('../services');
 
 router.get('/', (req, res) => {
-    res.json(supplinersList);
+    res.json(suppliersService.getAll());
 });
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
-    const supplier = supplinersList.find(s => s.Id == id);
+    const supplier = suppliersService.getById(id);
 
     if (!supplier) {
-        return res.status(404).json({ message: `Supplier with id ${id} not found` });
+        return res.status(404).json({ message: `Proveedor con id ${id} no encontrado` });
     }
 
     res.json(supplier);
@@ -35,72 +21,53 @@ router.post('/', (req, res) => {
     const { supplierName, contactName, phone, email, active, address } = req.body;
 
     if (!supplierName || !contactName || !email) {
-        return res.status(400).json({ message: 'supplierName, contactName and email are required' });
+        return res.status(400).json({ message: 'supplierName, contactName y email son obligatorios' });
     }
 
-    const newSupplier = {
-        Id: supplinersList.length > 0 ? Math.max(...supplinersList.map(s => s.Id)) + 1 : 1,
-        supplierName,
-        contactName,
-        phone: phone || '',
-        email,
-        active: active !== undefined ? active : true,
-        address: address || ''
-    };
-
-    supplinersList.push(newSupplier);
+    const newSupplier = suppliersService.create({ supplierName, contactName, phone, email, active, address });
     res.status(201).json(newSupplier);
 });
 
 router.put('/:id', (req, res) => {
     const { id } = req.params;
     const { supplierName, contactName, phone, email, active, address } = req.body;
-    const index = supplinersList.findIndex(s => s.Id == id);
-
-    if (index === -1) {
-        return res.status(404).json({ message: `Supplier with id ${id} not found` });
-    }
 
     if (!supplierName || !contactName || !email) {
-        return res.status(400).json({ message: 'supplierName, contactName and email are required' });
+        return res.status(400).json({ message: 'supplierName, contactName y email son obligatorios' });
     }
 
-    supplinersList[index] = {
-        Id: Number(id),
-        supplierName,
-        contactName,
-        phone: phone || supplinersList[index].phone,
-        email,
-        active: active !== undefined ? active : supplinersList[index].active,
-        address: address || supplinersList[index].address
-    };
+    const updated = suppliersService.update(id, { supplierName, contactName, phone, email, active, address });
 
-    res.json(supplinersList[index]);
+    if (!updated) {
+        return res.status(404).json({ message: `Proveedor con id ${id} no encontrado` });
+    }
+
+    res.json(updated);
 });
 
 router.patch('/:id', (req, res) => {
     const { id } = req.params;
     const updates = req.body;
-    const index = supplinersList.findIndex(s => s.Id == id);
 
-    if (index === -1) {
-        return res.status(404).json({ message: `Supplier with id ${id} not found` });
+    const patched = suppliersService.patch(id, updates);
+
+    if (!patched) {
+        return res.status(404).json({ message: `Proveedor con id ${id} no encontrado` });
     }
 
-    supplinersList[index] = { ...supplinersList[index], ...updates, Id: Number(id) };
-    res.json(supplinersList[index]);
+    res.json(patched);
 });
 
 router.delete('/:id', (req, res) => {
     const { id } = req.params;
-    const index = supplinersList.findIndex(s => s.Id == id);
 
-    if (index === -1) {
-        return res.status(404).json({ message: `Supplier with id ${id} not found` });
+    const deleted = suppliersService.delete(id);
+
+    if (!deleted) {
+        return res.status(404).json({ message: `Proveedor con id ${id} no encontrado` });
     }
 
-    const deleted = supplinersList.splice(index, 1);
-    res.json({ message: `Supplier with id ${id} deleted successfully`, supplier: deleted[0] });
+    res.json({ message: `Proveedor con id ${id} eliminado exitosamente`, supplier: deleted });
 });
 
 module.exports = router;

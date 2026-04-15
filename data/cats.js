@@ -2,7 +2,7 @@ const faker = require('faker')
 
 const categoriesList = [];
 
-for (let i = 1; i <= 10; i++) {
+for (let i = 0; i < 10; i++) {
     categoriesList.push({
         Id: i,
         categoryName: faker.commerce.department(),

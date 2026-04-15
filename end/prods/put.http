@@ -1,8 +1,8 @@
-POST http://localhost:3000/products
+PUT http://localhost:3000/products/8
 Content-Type: application/json
 
 {
-  "Name": "Super prod 2",
+  "Name": "Super EDI",
   "Price": 100,
   "Description": "una descripcion",
   "categoryId": 1,

@@ -11,8 +11,8 @@ for (let c = 0; c < 10; c++) {
         description: faker.lorem.sentence(),
         active: true,
         Stock: 12,
-        categoryId: c+1,
-        brandId: c+1
+        categoryId: c,
+        brandId: c
     });
 }
 

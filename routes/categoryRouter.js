@@ -1,27 +1,17 @@
-const express = require('express')
-const faker = require('faker')
+const express = require('express');
 const router = express.Router();
-
-const categoriesList = [];
-
-for (let i = 1; i <= 10; i++) {
-    categoriesList.push({
-        Id: i,
-        categoryName: faker.commerce.department(),
-        description: faker.lorem.sentence(),
-    });
-}
+const { categoryService, productsService } = require('../services');
 
 router.get('/', (req, res) => {
-    res.json(categoriesList);
+    res.json(categoryService.getAll());
 });
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
-    const category = categoriesList.find(c => c.Id == id);
+    const category = categoryService.getById(id);
 
     if (!category) {
-        return res.status(404).json({ message: `Category with id ${id} not found` });
+        return res.status(404).json({ message: `Categoría con id ${id} no encontrada` });
     }
 
     res.json(category);
@@ -31,64 +21,58 @@ router.post('/', (req, res) => {
     const { categoryName, description } = req.body;
 
     if (!categoryName || !description) {
-        return res.status(400).json({ message: 'categoryName and description are required' });
+        return res.status(400).json({ message: 'categoryName y description son obligatorios' });
     }
 
-    const newCategory = {
-        Id: categoriesList.length > 0 ? Math.max(...categoriesList.map(c => c.Id)) + 1 : 1,
-        categoryName,
-        description
-    };
-
-    categoriesList.push(newCategory);
+    const newCategory = categoryService.create({ categoryName, description });
     res.status(201).json(newCategory);
 });
 
 router.put('/:id', (req, res) => {
     const { id } = req.params;
     const { categoryName, description } = req.body;
-    const index = categoriesList.findIndex(c => c.Id == id);
-
-    if (index === -1) {
-        return res.status(404).json({ message: `Category with id ${id} not found` });
-    }
 
     if (!categoryName || !description) {
-        return res.status(400).json({ message: 'categoryName and description are required' });
+        return res.status(400).json({ message: 'categoryName y description son obligatorios' });
     }
 
-    categoriesList[index] = {
-        Id: Number(id),
-        categoryName,
-        description
-    };
+    const updated = categoryService.update(id, { categoryName, description });
 
-    res.json(categoriesList[index]);
+    if (!updated) {
+        return res.status(404).json({ message: `Categoría con id ${id} no encontrada` });
+    }
+
+    res.json(updated);
 });
 
 router.patch('/:id', (req, res) => {
     const { id } = req.params;
     const updates = req.body;
-    const index = categoriesList.findIndex(c => c.Id == id);
 
-    if (index === -1) {
-        return res.status(404).json({ message: `Category with id ${id} not found` });
+    const patched = categoryService.patch(id, updates);
+
+    if (!patched) {
+        return res.status(404).json({ message: `Categoría con id ${id} no encontrada` });
     }
 
-    categoriesList[index] = { ...categoriesList[index], ...updates, Id: Number(id) };
-    res.json(categoriesList[index]);
+    res.json(patched);
 });
 
 router.delete('/:id', (req, res) => {
     const { id } = req.params;
-    const index = categoriesList.findIndex(c => c.Id == id);
 
-    if (index === -1) {
-        return res.status(404).json({ message: `Category with id ${id} not found` });
+    // Verificar si hay productos asociados a esta categoría
+    if (productsService.hasCategoryProducts(id)) {
+        return res.status(400).json({ message: `No se puede eliminar la categoría con id ${id} porque tiene productos asociados` });
     }
 
-    const deleted = categoriesList.splice(index, 1);
-    res.status(200).json({ message: `Category con id ${id} se borro 👍`, category: deleted[0] });
+    const deleted = categoryService.delete(id);
+
+    if (!deleted) {
+        return res.status(404).json({ message: `Categoría con id ${id} no encontrada` });
+    }
+
+    res.status(200).json({ message: `Categoría con id ${id} se borró 👍`, category: deleted });
 });
 
 module.exports = router;
